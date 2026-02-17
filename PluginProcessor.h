@@ -15,10 +15,10 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
 
-    const juce::String getName() const override { return JucePlugin_Name; }
+    const juce::String getName() const override { return "Choir Effect"; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
-    double getTailLengthSeconds() const override { return 0.0; }
+    double getTailLengthSeconds() const override { return 1.0; }
 
     int getNumPrograms() override { return 1; }
     int getCurrentProgram() override { return 0; }
@@ -29,16 +29,21 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    // Bridge for the Editor to find parameters
     juce::AudioProcessorValueTreeState& getAPVTS() { return apvts; }
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts;
 
-    // Audio Processing variables
-    std::vector<juce::AudioBuffer<float>> voiceBuffers;
+    // --- Real-time Choir Logic ---
+    juce::AudioBuffer<float> delayBuffer; 
     int writePointer { 0 };
+    juce::Random random;
+    
+    // We store pre-calculated random offsets for each voice 
+    // to mimic your "randomDelay" logic without it crackling every sample
+    std::vector<float> voiceOffsets; 
+    void updateVoiceOffsets(int numVoices, float maxDelayMs);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoirAudioProcessor)
 };
