@@ -18,7 +18,7 @@ private:
 
     juce::Slider pitchSlider, voicesSlider, delaySlider;
     juce::Label pitchLabel, voicesLabel, delayLabel;
-
+    juce::TextButton helpButton { "?" };
     using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     std::unique_ptr<Attachment> pitchAttachment, voicesAttachment, delayAttachment;
 
