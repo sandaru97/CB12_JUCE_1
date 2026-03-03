@@ -16,7 +16,11 @@ ChoirAudioProcessorEditor::ChoirAudioProcessorEditor (ChoirAudioProcessor& p)
 
     // Help Button Setup
     addAndMakeVisible(helpButton);
-    helpButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey.withAlpha(0.2f));
+    helpButton.setButtonText("?");
+    // Set button to a light grey/black alpha so it's visible on Ivory
+    helpButton.setColour(juce::TextButton::buttonColourId, juce::Colours::black.withAlpha(0.05f));
+    helpButton.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+    helpButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::black.withAlpha(0.2f));
     
     helpButton.onClick = [this] {
         juce::String helpText = 
@@ -47,23 +51,36 @@ void ChoirAudioProcessorEditor::setupSlider(juce::Slider& s, juce::Label& l, juc
     s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     
+    // Force Slider Colors to Black (#000)
+    s.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::black);
+    s.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::black.withAlpha(0.2f));
+    s.setColour(juce::Slider::thumbColourId, juce::Colours::black);
+    s.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+    s.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    
     addAndMakeVisible(l);
     l.setText(name, juce::dontSendNotification);
     l.setJustificationType(juce::Justification::centred);
+    
+    // Force Label Color to Black (#000)
+    l.setColour(juce::Label::textColourId, juce::Colours::black);
 }
 
 void ChoirAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colours::black);
-    g.setColour (juce::Colours::white);
+    // Background: Ivory (#FFFFF0)
+    g.fillAll (juce::Colour::fromRGBA(255, 255, 240, 255)); 
+    
+    // Header Text: Black (#000)
+    g.setColour (juce::Colours::black);
     g.setFont (18.0f);
     
     // Header Area
     auto header = getLocalBounds().removeFromTop(40);
     g.drawFittedText ("Choirboy12", header, juce::Justification::centred, 1);
     
-    // Bottom border for header
-    g.setColour(juce::Colours::white.withAlpha(0.2f));
+    // Bottom border for header (subtle black line)
+    g.setColour(juce::Colours::black.withAlpha(0.1f));
     g.drawLine(10, 40, getWidth() - 10, 40);
 }
 
