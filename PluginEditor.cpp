@@ -4,30 +4,29 @@
 ChoirAudioProcessorEditor::ChoirAudioProcessorEditor (ChoirAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    // Setup Menu Bar
+    // 1. Setup Menu Bar
     addAndMakeVisible(menuBar);
     menuBar.setModel(this);
     menuBar.setColour(juce::PopupMenu::backgroundColourId, juce::Colours::transparentBlack);
     menuBar.setColour(juce::PopupMenu::headerTextColourId, juce::Colours::black);
 
-    // Initialize Sliders
+    // 2. Initialize Sliders
     setupSlider(pitchSlider, pitchLabel, "Pitch Offset");
     setupSlider(voicesSlider, voicesLabel, "Voices");
     setupSlider(delaySlider, delayLabel, "Max Delay (ms)");
 
-    // Attach to APVTS
+    // Attachments
     pitchAttachment = std::make_unique<Attachment>(audioProcessor.getAPVTS(), "pitch", pitchSlider);
     voicesAttachment = std::make_unique<Attachment>(audioProcessor.getAPVTS(), "voices", voicesSlider);
     delayAttachment = std::make_unique<Attachment>(audioProcessor.getAPVTS(), "delay", delaySlider);
 
-    // Help Button Setup
+    // 3. Help Button Setup
     addAndMakeVisible(helpButton);
+    helpButton.setButtonText("?");
     helpButton.setColour(juce::TextButton::buttonColourId, juce::Colours::black.withAlpha(0.05f));
     helpButton.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
     
-    // Use Courier for the help button specifically
-    helpButton.setLookAndFeel(&juce::LookAndFeel::getDefaultLookAndFeel()); 
-
+    // Using the updated showHelpWindow logic
     helpButton.onClick = [this] { showHelpWindow(); };
 
     setSize (400, 300);
@@ -38,18 +37,28 @@ ChoirAudioProcessorEditor::~ChoirAudioProcessorEditor()
     menuBar.setModel(nullptr);
 }
 
-// --- Reusable Help Function ---
 void ChoirAudioProcessorEditor::showHelpWindow()
 {
-    juce::String helpText = "Choirboy12: Multi-voice vocal thickening ensemble.\n\nCopyright (C) 2026.";
-    juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "About", helpText, "Close");
+    juce::String helpText = 
+        "Choirboy12 is a multi-voice thickening effect that transforms a single input into a lush vocal ensemble.\n\n"
+        "PARAMETERS:\n"
+        "* Voices: Sets the total number of generated voices.\n"
+        "* Offset: Adjusts the pitch interval (semitones) between voices.\n"
+        "* Delay: Adds timing offsets for a natural, 'loose' ensemble feel.\n"
+        "* Stereo: Controls the width across the L/R channels.\n"
+        "* Overload: Adjusts internal drive and saturation.\n\n"
+        "Copyright (C) 2025. All Rights Reserved.";
+
+    juce::AlertWindow::showMessageBoxAsync (
+        juce::MessageBoxIconType::InfoIcon,
+        "About Choirboy12",
+        helpText,
+        "Close"
+    );
 }
 
-// --- Menu Bar Logic ---
-juce::StringArray ChoirAudioProcessorEditor::getMenuBarNames() 
-{ 
-    return { "Presets", "Help" }; // Added Help to top bar
-}
+// --- Menu Bar Implementation ---
+juce::StringArray ChoirAudioProcessorEditor::getMenuBarNames() { return { "Presets", "Help" }; }
 
 juce::PopupMenu ChoirAudioProcessorEditor::getMenuForIndex (int menuIndex, const juce::String& menuName)
 {
@@ -71,15 +80,15 @@ juce::PopupMenu ChoirAudioProcessorEditor::getMenuForIndex (int menuIndex, const
 
 void ChoirAudioProcessorEditor::menuItemSelected (int menuItemID, int topLevelMenuIndex) 
 {
-    if (menuItemID == 100) // "About" clicked in Help menu
-        showHelpWindow();
+    if (menuItemID == 100) showHelpWindow();
 }
 
-// --- UI Setup ---
+// --- Slider & Label Setup ---
 void ChoirAudioProcessorEditor::setupSlider(juce::Slider& s, juce::Label& l, juce::String name) {
     addAndMakeVisible(s);
     s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+
     s.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::black);
     s.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::black.withAlpha(0.2f));
     s.setColour(juce::Slider::thumbColourId, juce::Colours::black);
@@ -88,7 +97,10 @@ void ChoirAudioProcessorEditor::setupSlider(juce::Slider& s, juce::Label& l, juc
     
     addAndMakeVisible(l);
     l.setText(name, juce::dontSendNotification);
-    l.setFont(juce::Font("Courier", 14.0f, juce::Font::plain)); // Label font
+    
+    // Using FontOptions is the modern, warning-free way to set fonts
+    l.setFont (juce::FontOptions ("Courier New", 14.0f, juce::Font::plain));
+    
     l.setJustificationType(juce::Justification::centred);
     l.setColour(juce::Label::textColourId, juce::Colours::black);
 }
@@ -98,8 +110,8 @@ void ChoirAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (juce::Colour::fromRGBA(255, 255, 240, 255)); // Ivory
     g.setColour (juce::Colours::black);
     
-    // Set Courier for the Header
-    g.setFont (juce::Font("Courier", 20.0f, juce::Font::bold));
+    // Main Title Font using "Courier New"
+    g.setFont (juce::FontOptions ("Courier New", 22.0f, juce::Font::bold));
     
     auto headerArea = getLocalBounds().removeFromTop(60).withTrimmedTop(25);
     g.drawFittedText ("Choirboy12", headerArea, juce::Justification::centred, 1);
@@ -112,7 +124,10 @@ void ChoirAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
     menuBar.setBounds(area.removeFromTop(25));
+    
+    // Placing the Help button in the top right header area
     helpButton.setBounds(getWidth() - 35, 30, 25, 25);
+    
     area.removeFromTop(35);
     
     auto sliderArea = area.reduced(20);
