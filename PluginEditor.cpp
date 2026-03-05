@@ -4,6 +4,12 @@
 ChoirAudioProcessorEditor::ChoirAudioProcessorEditor (ChoirAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    // Setup Menu Bar
+    addAndMakeVisible(menuBar);
+    menuBar.setModel(this);
+    menuBar.setColour(juce::PopupMenu::backgroundColourId, juce::Colours::transparentBlack);
+    menuBar.setColour(juce::PopupMenu::headerTextColourId, juce::Colours::black);
+
     // Initialize Sliders
     setupSlider(pitchSlider, pitchLabel, "Pitch Offset");
     setupSlider(voicesSlider, voicesLabel, "Voices");
@@ -16,42 +22,64 @@ ChoirAudioProcessorEditor::ChoirAudioProcessorEditor (ChoirAudioProcessor& p)
 
     // Help Button Setup
     addAndMakeVisible(helpButton);
-    helpButton.setButtonText("?");
-    // Set button to a light grey/black alpha so it's visible on Ivory
     helpButton.setColour(juce::TextButton::buttonColourId, juce::Colours::black.withAlpha(0.05f));
     helpButton.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
-    helpButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::black.withAlpha(0.2f));
     
-    helpButton.onClick = [this] {
-        juce::String helpText = 
-            "Choirboy12 is a multi-voice thickening effect that transforms a single input into a lush vocal ensemble.\n\n"
-            "PARAMETERS:\n"
-            "* Voices: Sets the total number of generated voices.\n"
-            "* Offset: Adjusts the pitch interval (semitones) between voices.\n"
-            "* Delay: Adds timing offsets for a natural, 'loose' ensemble feel.\n"
-            "* Stereo: Controls the width across the L/R channels.\n"
-            "* Overload: Adjusts internal drive and saturation.\n\n"
-            "Copyright (C) 2025. All Rights Reserved.";
+    // Use Courier for the help button specifically
+    helpButton.setLookAndFeel(&juce::LookAndFeel::getDefaultLookAndFeel()); 
 
-        juce::AlertWindow::showMessageBoxAsync (
-            juce::MessageBoxIconType::InfoIcon,
-            "About Choirboy12",
-            helpText,
-            "Close"
-        );
-    };
+    helpButton.onClick = [this] { showHelpWindow(); };
 
     setSize (400, 300);
 }
 
-ChoirAudioProcessorEditor::~ChoirAudioProcessorEditor() {}
+ChoirAudioProcessorEditor::~ChoirAudioProcessorEditor() 
+{
+    menuBar.setModel(nullptr);
+}
 
+// --- Reusable Help Function ---
+void ChoirAudioProcessorEditor::showHelpWindow()
+{
+    juce::String helpText = "Choirboy12: Multi-voice vocal thickening ensemble.\n\nCopyright (C) 2026.";
+    juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "About", helpText, "Close");
+}
+
+// --- Menu Bar Logic ---
+juce::StringArray ChoirAudioProcessorEditor::getMenuBarNames() 
+{ 
+    return { "Presets", "Help" }; // Added Help to top bar
+}
+
+juce::PopupMenu ChoirAudioProcessorEditor::getMenuForIndex (int menuIndex, const juce::String& menuName)
+{
+    juce::PopupMenu menu;
+    if (menuName == "Presets")
+    {
+        menu.addItem (1, "TightDouble");
+        menu.addItem (2, "LushQuadret");
+        menu.addItem (3, "GrandEnsemble");
+        menu.addItem (4, "Haunted");
+        menu.addItem (5, "Microunison");
+    }
+    else if (menuName == "Help")
+    {
+        menu.addItem (100, "About Choirboy12");
+    }
+    return menu;
+}
+
+void ChoirAudioProcessorEditor::menuItemSelected (int menuItemID, int topLevelMenuIndex) 
+{
+    if (menuItemID == 100) // "About" clicked in Help menu
+        showHelpWindow();
+}
+
+// --- UI Setup ---
 void ChoirAudioProcessorEditor::setupSlider(juce::Slider& s, juce::Label& l, juce::String name) {
     addAndMakeVisible(s);
     s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
-    
-    // Force Slider Colors to Black (#000)
     s.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::black);
     s.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::black.withAlpha(0.2f));
     s.setColour(juce::Slider::thumbColourId, juce::Colours::black);
@@ -60,51 +88,45 @@ void ChoirAudioProcessorEditor::setupSlider(juce::Slider& s, juce::Label& l, juc
     
     addAndMakeVisible(l);
     l.setText(name, juce::dontSendNotification);
+    l.setFont(juce::Font("Courier", 14.0f, juce::Font::plain)); // Label font
     l.setJustificationType(juce::Justification::centred);
-    
-    // Force Label Color to Black (#000)
     l.setColour(juce::Label::textColourId, juce::Colours::black);
 }
 
 void ChoirAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // Background: Ivory (#FFFFF0)
-    g.fillAll (juce::Colour::fromRGBA(255, 255, 240, 255)); 
-    
-    // Header Text: Black (#000)
+    g.fillAll (juce::Colour::fromRGBA(255, 255, 240, 255)); // Ivory
     g.setColour (juce::Colours::black);
-    g.setFont (18.0f);
     
-    // Header Area
-    auto header = getLocalBounds().removeFromTop(40);
-    g.drawFittedText ("Choirboy12", header, juce::Justification::centred, 1);
+    // Set Courier for the Header
+    g.setFont (juce::Font("Courier", 20.0f, juce::Font::bold));
     
-    // Bottom border for header (subtle black line)
+    auto headerArea = getLocalBounds().removeFromTop(60).withTrimmedTop(25);
+    g.drawFittedText ("Choirboy12", headerArea, juce::Justification::centred, 1);
+    
     g.setColour(juce::Colours::black.withAlpha(0.1f));
-    g.drawLine(10, 40, getWidth() - 10, 40);
+    g.drawLine(10.0f, 60.0f, (float)getWidth() - 10.0f, 60.0f);
 }
 
 void ChoirAudioProcessorEditor::resized()
 {
-    auto area = getLocalBounds().reduced(20);
+    auto area = getLocalBounds();
+    menuBar.setBounds(area.removeFromTop(25));
+    helpButton.setBounds(getWidth() - 35, 30, 25, 25);
+    area.removeFromTop(35);
     
-    // Position Help Button top right
-    helpButton.setBounds(getWidth() - 35, 10, 25, 25);
-
-    area.removeFromTop(40); // Clear space for the header
+    auto sliderArea = area.reduced(20);
+    int width = sliderArea.getWidth() / 3;
     
-    int width = area.getWidth() / 3;
-    
-    // Layout logic for the three main sliders
-    auto pitchArea = area.removeFromLeft(width);
+    auto pitchArea = sliderArea.removeFromLeft(width);
     pitchLabel.setBounds(pitchArea.removeFromTop(20));
     pitchSlider.setBounds(pitchArea.reduced(5));
 
-    auto voicesArea = area.removeFromLeft(width);
+    auto voicesArea = sliderArea.removeFromLeft(width);
     voicesLabel.setBounds(voicesArea.removeFromTop(20));
     voicesSlider.setBounds(voicesArea.reduced(5));
 
-    auto delayArea = area;
+    auto delayArea = sliderArea;
     delayLabel.setBounds(delayArea.removeFromTop(20));
     delaySlider.setBounds(delayArea.reduced(5));
 }
