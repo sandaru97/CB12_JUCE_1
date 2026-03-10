@@ -70,7 +70,13 @@ juce::PopupMenu ChoirAudioProcessorEditor::getMenuForIndex (int menuIndex, const
         menu.addItem (3, "GrandEnsemble");
         menu.addItem (4, "Haunted");
         menu.addItem (5, "Microunison");
-    }
+        menu.addItem (6, "Small Group");
+        menu.addItem (7, "Chamber Choir");
+        menu.addItem (8, "The swarm");
+        menu.addItem (9, "Power Unsion");
+        menu.addItem (10, "Octave Up");
+
+}
     else if (menuName == "Help")
     {
         menu.addItem (100, "About Choirboy12");
@@ -111,10 +117,10 @@ void ChoirAudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour (juce::Colours::black);
     
     // Main Title Font using "Courier New"
-    g.setFont (juce::FontOptions ("Courier New", 22.0f, juce::Font::bold));
+    g.setFont (juce::FontOptions ("Courier New", 32.0f, juce::Font::bold));
     
     auto headerArea = getLocalBounds().removeFromTop(60).withTrimmedTop(25);
-    g.drawFittedText ("Choirboy12", headerArea, juce::Justification::centred, 1);
+    g.drawFittedText ("ChoirBoy12", headerArea, juce::Justification::centred, 1);
     
     g.setColour(juce::Colours::black.withAlpha(0.1f));
     g.drawLine(10.0f, 60.0f, (float)getWidth() - 10.0f, 60.0f);
